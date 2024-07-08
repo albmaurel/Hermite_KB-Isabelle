@@ -698,8 +698,7 @@ lemma foldl_preserves_diagonal_entry:
   shows "foldl (reduce i) A [0..<j] $$ (j, j) \<noteq> 0" sorry
 (*OTRA POSIBILIDAD : O trabajando en (k,k) donde el problema es que no se entre que valores meter k para que me sirva*)
 
-
-(*  POSIBLE DEMOSTRACIÓN
+(*POSIBLE DEMOSTRACIÓN
 using j i_j  Ajj 
 proof(induction j)
    case 0
@@ -720,7 +719,7 @@ next
      show "0 \<le> j" using Suc.prems assms by auto
      show "j < Suc j" by simp
      show "Suc j < i" using Suc.prems sorry
-     show "?F $$ (Suc j,Suc j) \<noteq> 0" sorry (*no tiene sentido tener que demostrar esto*)
+     show "?F $$ (Suc j,Suc j) \<noteq> 0" sorry (no tiene sentido tener que demostrar esto)
    qed
    finally show ?case .
 qed
