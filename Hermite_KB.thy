@@ -168,7 +168,13 @@ value "let A = mat_of_rows_list 5 ([
 [  -8,   8,  12,  8, 14]]) in 
   show (reduce 3 A 1)" 
 
-
+(*RESULTADO:
+[[3,  4, -43, -3,  13],
+ [3,  5,  2,  12, - 5], 
+ [0,  0,  12,  8,  14], 
+ [6,  0,  2,  21, -20],
+ [-8, 8,  12,  8,  14]]
+*)
 
 thm foldl.simps (*Comprobamos el funcionamiento de la función foldl*)
 
@@ -206,7 +212,6 @@ proof -
         comm_monoid_gcd_class.gcd_dvd1 comm_monoid_gcd_class.gcd_dvd2 dvd_div_mult_self dvd_minus_iff minus_mult_right)
   show ?thesis using 1 2 3 4 by presburger
 qed
-
 
 
 (*Demostrar que el elemento que esta debajo de la diagonal en la fila i  y la columna j es 0 
@@ -480,8 +485,8 @@ lemma reduce_preserves_elements:
     and j0: "j > 0"
     and k_j: "k < j"
     and l_j: "l < j"
-    and m_j: "m < j"
-    and zero_above:" A $$ (j, m) = 0" (*Asumimos que por el orden en el que se producen los  0's en nuestro algoritmo los elementos en la fila j y las columnas m<j son 0*)
+    and zero_above1:" A $$ (i, l) = 0"
+    and zero_above2:" A $$ (j, l) = 0" (*Asumimos que por el orden en el que se producen los  0's en nuestro algoritmo los elementos en la fila j y las columnas m<j son 0*)
     and Ajj:"A $$ (j, j) \<noteq> 0"
    shows "(reduce i A j) $$ (k, l) = A $$ (k, l)"
 proof-
@@ -507,8 +512,8 @@ proof-
  have 2: "?A'' $$ (k, l) = (reduce_off_diagonal j (reduce_positive j ?A')) $$ (k, l)" using assms pquvd 
    by blast
   have 3 :"(reduce_off_diagonal j (reduce_positive j ?A')) $$ (k, l) = (reduce_positive j ?A') $$ (k, l)"
-    using assms  euclid_ext2_def  pquvd pq_times_Ajj_plus_q_Aij_strictly_positive[OF A _ _ pquvd] 
-    unfolding  reduce_off_diagonal_def sorry
+    using assms  pquvd pq_times_Ajj_plus_q_Aij_strictly_positive[OF A _ _ pquvd] reduce_positive_works 
+    unfolding  reduce_off_diagonal_def Let_def reduce_positive.simps by auto
    have 4: "(reduce_positive j ?A') $$ (k, l) = ?A'  $$ (k, l)"
      unfolding reduce_positive.simps using reduce_positive_works assms by auto
    have 5: " ?A'  $$ (k, l) = A  $$ (k, l) "
@@ -692,8 +697,8 @@ qed
 lemma foldl_preserves_diagonal_entry:
  assumes A: "A \<in> carrier_mat n n"
     and i: "i < n"
-    and j: "j \<ge> 0"
-    and i_j: "j\<le>i"
+    and j: "j > 0"
+    and i_j: "j<i"
     and Ajj:"A $$ (j, j) \<noteq> 0"
   shows "foldl (reduce i) A [0..<j] $$ (j, j) \<noteq> 0" sorry
 (*OTRA POSIBILIDAD : O trabajando en (k,k) donde el problema es que no se entre que valores meter k para que me sirva*)
@@ -734,6 +739,7 @@ lemma foldl_reduce_lower_than_diagonal:
     and i_j: "j\<le>i"
     and l_j: "l<j"
     and k_l: "k<l"
+    and Ail:"A $$ (i, l)= 0"
     and Ajj:"A $$ (j, j) \<noteq> 0"
   shows "foldl (reduce i) A [0..<j] $$ (k, l) < foldl (reduce i) A [0..<j] $$ (l, l)" 
   using i_j  j l_j k k_l Ajj
@@ -761,7 +767,14 @@ next
         show "j < i" using Suc_j_less_i by simp
         show "0 < j" using less_Suc_j  k_le_l l_le_Suc_j by simp
         show "k < j" using True Suc(6) by simp
-        show "?F $$ (j, j) \<noteq> 0"  sorry (*NO ESTÁ DEMOSTRADO*)
+        show "?F $$ (j, j) \<noteq> 0"   
+         proof( rule foldl_preserves_diagonal_entry)(*NO ESTÁ DEMOSTRADO*)
+          show "A ∈ carrier_mat n n " using assms by auto
+          show "i < n" using i by simp
+          show "0 < j" using less_Suc_j  k_le_l l_le_Suc_j by simp
+          show "j < i" using Suc_j_less_i by auto
+          show "A $$ (j, j) ≠ 0" using Suc.prems assms sorry
+         qed
       qed
       show ?thesis using True 1 reduce_Suc unfolding reduce_def 
         by meson
@@ -786,27 +799,29 @@ next
      show "0 < j" using less_Suc_j  k_le_l l_le_Suc_j by simp
      show "l < j" using Suc(4) 
        by (simp add: l_less_j)
-     show "l < j" using Suc(4) 
-           by (simp add: l_less_j)
      show " k < j" using  l_less_j  Suc(6) by auto
-     show "foldl (reduce i) A [0..<j] $$ (j, l) = 0" sorry
+     show "foldl (reduce i) A [0..<j] $$ (i, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
+     show "foldl (reduce i) A [0..<j] $$ (j, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
      show "?F $$ (j,j)\<noteq>0" sorry (*NO ESTÁ DEMOSTRADO*)
    qed
-   also have 6:"... < ?F $$ (l,l)" using  False 4 5 l_less_j 
-     by blast
- (*  have 7:"reduce i ?F j $$ (l, l) = ?F $$ (l, l)" 
-   proof(rule reduce_preserves_elements)
+   have 6:"reduce i ?F j $$ (k, l) < ?F $$ (l,l)" using  False 4 5 l_less_j 
+     by linarith
+   also have 7:"reduce i ?F j $$ (l, l) = ..."  
+   proof(rule reduce_preserves_elements) (*POSIBLE DEMOSTRACIÓN*)
      show "?F\<in> carrier_mat n n"  by (rule foldl_reduce_carrier_mat[OF A])
      show "i < n" using i by simp
      show "j < i" using Suc_j_less_i by simp
-     show "0 \<le> j" using less_Suc_j by simp
+     show "0 < j" using less_Suc_j sledgehammer
+       using l_less_j by auto
      show "l < j" using Suc(4) 
            by (simp add: l_less_j)
      show "l < j" using Suc(4) 
-           by (simp add: l_less_j)
-     show "?F $$ (j,j)\<noteq>0" sorry
-   qed*)
-    finally show ?thesis using 4 5 6  False l_less_j sorry (*NO ESTÁ DEMOSTRADO*)
+       by (simp add: l_less_j)
+     show "foldl (reduce i) A [0..<j] $$ (i, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
+     show "foldl (reduce i) A [0..<j] $$ (j, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
+     show "?F $$ (j,j)\<noteq>0" sorry (*NO ESTÁ DEMOSTRADO*)
+   qed
+    finally show ?thesis using 4 5 6  7 False l_less_j by auto
   qed
   finally show ?case .
 qed
@@ -899,8 +914,10 @@ next
     then show ?thesis
     proof (cases "k < j")
       case True
+      from `l = j` have l_j: "l = j" .
       hence k_less_j: "k<j"
-        using Suc(4) less_SucE by blast
+        using Suc(4) less_SucE 
+        using True by linarith
       have 1: "reduce i ?F j $$ (k, j) \<ge> 0"
       proof (rule reduce_preserves_positivity_above)
         show "?F \<in> carrier_mat n n" by (rule foldl_reduce_carrier_mat[OF A])
@@ -909,16 +926,16 @@ next
         show "0 < j" using k_less_j by auto
         show "k < j" using True by simp
         show "?F $$ (j, j) \<noteq> 0"   using reduce_Suc unfolding reduce_def 
-          sorry    
+          sorry (*NO ESTÁ DEMOSTRADO*)   
       qed
-      show ?thesis using True 1 reduce_Suc k_less_j  unfolding reduce_def
-        sorry   
+      show ?thesis using  True 1 reduce_Suc k_less_j l_j unfolding reduce_def
+        by fastforce   
       next
       case False
       then have "k = j" using k_le_Suc_j by simp
       have 2: "reduce i ?F j $$ (j, j) > 0" using pq_times_Ajj_plus_q_Aij_strictly_positive reduce_Suc
             False unfolding reduce_def 
-        sorry     
+        sorry  (*NO ESTÁ DEMOSTRADO*)   
       then show ?thesis using 2 False reduce_Suc unfolding reduce_def 
         using True \<open>k = j\<close> by presburger
       qed
@@ -945,12 +962,12 @@ next
        show "j < i" using Suc_j_less_i by simp
        show "0 < j" using k_less_j by simp
        show "k < j" using True by simp
-       show "k < j" using True by simp
        show " l < j" using Suc(4) 
            by (simp add: l_less_j)
        show "?F $$ (j, j) \<noteq> 0"   using reduce_Suc unfolding reduce_def 
-         sorry
-       show "foldl (reduce i) A [0..<j] $$ (j, k) = 0" sorry
+         sorry (*NO ESTÁ DEMOSTRADO*)
+       show "foldl (reduce i) A [0..<j] $$ (i, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
+       show "foldl (reduce i) A [0..<j] $$ (j, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
      qed
     also have "?F $$ (k, l) \<ge> 0" using hyp by simp
     then show ?thesis using True reduce_Suc  3 hyp
@@ -958,10 +975,11 @@ next
     next
       case False
       then have 3: "k = j" using k_le_Suc_j by simp
-      have 4:"?F $$ (j, l) \<ge> 0" using False 3 reduce_Suc foldl_reduce_0[OF A] unfolding reduce_def 
-        using Suc(3) sorry
-      then show ?thesis using False reduce_Suc 3 4 unfolding reduce_def 
-        using assms(2) sorry
+      have 4:" reduce i ?F j  $$ (j, l) = ?F $$ (j, l)" sorry (*NO ESTÁ DEMOSTRADO*)
+      also have 5:"... = 0" using False 3 reduce_Suc foldl_reduce_0[OF A] unfolding reduce_def 
+        using Suc(3) sorry (*NO ESTÁ DEMOSTRADO*)
+      then show ?thesis using False reduce_Suc 3 4  
+        using assms(2) by auto
     qed
   qed
   finally show ?case .
@@ -1025,6 +1043,7 @@ lemma reduce_row_lower_diagonal:
     and i_j: "j<i"
     and ki: "k<i"
     and kj:"k<j"
+    and "A$$ (i,j) = 0"
     and "A $$ (i, i) \<noteq> 0"
   shows  "(reduce_row A i) $$ (k,j)<(reduce_row A i) $$ (j,j)" 
 proof -
@@ -1039,6 +1058,7 @@ proof -
     show "i \<le> i" by simp
     show "j<i" using assms by simp
     show "k<j" using assms by simp
+    show "A $$ (i, j) = 0" using assms by simp
     show "A $$ (i, i) \<noteq> 0" using assms by simp
   qed
   finally show ?thesis using 1 2 3 by presburger
@@ -1165,7 +1185,7 @@ proof-
      have 5:"(reduce_positive i ?A') $$ (i, i) \<ge> ?A' $$ (i, i)"  
        using reduce_positive_works[of  ?A' i] assms 
             reduce_positive.simps 4  by auto
-     have 6:  "?A' $$ (i, i) = A $$ (i, i)" using assms 1 2 4 5 unfolding reduce_row_def sorry
+     have 6:  "?A' $$ (i, i) = A $$ (i, i)" using assms 1 2 4 5 unfolding reduce_row_def sorry (*NO ESTÁ DEMOSTRADO*)
       show ?thesis using assms  1 2 4 5 6 by auto
         qed
       qed   
@@ -1180,7 +1200,36 @@ lemma final_reduce_lower_diagonal:
     and i_n: "i<n"
     and ki: "k<i"
     and "A $$ (i, i) \<noteq> 0"
-  shows  "( final_reduce A i) $$ (k,i)<( final_reduce A i) $$ (i,i)" sorry
+  shows  "(final_reduce A i) $$ (k,i) < (final_reduce A i) $$ (i,i)" 
+proof-
+  let ?A' = "reduce_row A i"
+  let ?A'' = "reduce_positive i ?A'"
+  let ?A''' = "reduce_off_diagonal i ?A''"
+
+  have 1: "(final_reduce A i) =  ?A'''"
+    using final_reduce_def by auto
+  have 2: "?A'''=reduce_off_diagonal i ?A''" by auto
+  have 3 :"(reduce_off_diagonal i (reduce_positive i ?A')) $$ (k, i) < (reduce_off_diagonal i (reduce_positive i ?A')) $$ (i, i)"
+   proof (rule reduce_off_diagonal_works1) (*Hacemos uso del lema desarrollado anteriormente para la demostración de 3*)
+     show "(reduce_positive i ?A') \<in> carrier_mat n n"
+       using assms by (simp add: assms(1) reduce_row_carrier)
+     show "k<i" using assms by simp
+     show "i < n" using assms by simp
+     show " (reduce_positive i ?A') $$ (i, i) > 0" 
+        proof-
+        have 4:"reduce_positive i ?A' \<in> carrier_mat n n"
+            using assms by (simp add: assms(1) reduce_row_carrier)
+        have 5:"(reduce_positive i ?A') $$ (i, i) \<ge> ?A' $$ (i, i)"  
+            using reduce_positive_works[of  ?A' i] assms 
+            reduce_positive.simps 4  by auto
+        have 6:  "?A' $$ (i, i) = A $$ (i, i)" using assms 1 2 4 5 unfolding reduce_row_def sorry (*NO ESTÁ DEMOSTRADO*)
+      show ?thesis using assms  1 2 4 5 6 by auto
+        qed
+   qed 
+   have "(final_reduce A i) $$ (k,i) < ?A''' $$ (i, i)" using 1 2 3  by auto
+   also have "... = (final_reduce A i) $$ (i,i)" using 1 by auto
+   finally show ?thesis .
+ qed
 
 
 (*Y ahora itero el proceso desde la primera fila hasta la última (suponemos que es cuadrada):*)
@@ -1197,12 +1246,25 @@ value "let A = mat_of_rows_list 5 ([
 [  -8,   8,  12,  8, 14]]) in 
   show (reduce_row A 3)" 
 
+(*RESULTADO
+[[3,  0,  1, -8407, -39563], 
+ [0,  1,  1,  1654,   7770], 
+ [0,  0,  4,  -149,   -708], 
+ [0,  0,  0,  -455,  -2138], 
+ [-8, 8, 12,     8,     14]]
+*)
 
 value "let A = mat_of_rows_list 3 ([
         [3, 6, -9::int],
         [1, 4, -7],
         [0, 5, -8]]) in 
   show (final_reduce A 2)" 
+
+(*RESULTADO:
+[[4,  0, 0], 
+ [-6, 1, 2], 
+ [-5, 0, 3]]
+*)
 
 (*Si ahora cojo una matriz 5x5 llena de números:*)
 value "let A = mat_of_rows_list 5 ([
@@ -1213,7 +1275,13 @@ value "let A = mat_of_rows_list 5 ([
 [  -8,   8,  12,  8, 14]]) in
   show (HNF_Kannan_Bachem A)" 
 
-
+(*RESULTADO:
+[[1, 0, 3, 1,  6247], 
+ [0, 1, 1, 2,   466], 
+ [0, 0, 4, 5, 12856], 
+ [0, 0, 0, 7,  8746], 
+ [0, 0, 0, 0, 29808]]
+*)
 
 definition is_in_Hermite :: "int mat \<Rightarrow> bool"
   where "is_in_Hermite A = (
