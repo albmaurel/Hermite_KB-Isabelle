@@ -13,6 +13,11 @@ value "let A = mat_of_rows_list 4 ([
 [  0,   0,   0,  12]]) in 
   show (multrow 2 (-1) A)" (*El show es solo para que se muestre más bonito*)
 
+(*RESULTADO:
+[[1,  9,  1,  9], 
+ [0, 10,  2,  3], 
+ [0,  0, 12, -8], 
+ [0,  0,  0, 12]]*)
 
 (*Mediante esta definición modificamos una matriz A a partir de la creación de otra matriz del mismo tamaño. En esta matriz los valores por encima de la fila k se ajustan mediante
 A$$(i,j) - A$$(k,j) * (A$$(i,k) div A$$(k,k), el resto de valores quedan intactos*)
@@ -90,6 +95,12 @@ value "let A = mat_of_rows_list 4 ([
 [  0,   0,   0,  12]]) in 
   show (reduce_off_diagonal 2 A)"
 
+(*RESULTADO:
+[[1,  9,  7, 41], 
+ [0, 10,  2,  3], 
+ [0,  0, 12,  8], 
+ [0,  0,  0, 12]]*)
+
 value "let A = mat_of_rows_list 4 ([
 [  1,   9, -41,   9::int],
 [  0,  -10,   2,   3],
@@ -97,6 +108,11 @@ value "let A = mat_of_rows_list 4 ([
 [  0,   0,   0,  12]]) in 
   show (reduce_positive 1 A)"
 
+(*RESULTADO:
+[[1,  9, -41,  9], 
+ [0, 10,  -2, -3], 
+ [0,  0,  12,  8], 
+ [0,  0,   0, 12]]*)
 
 
 (*Se define este lema cuyo significado es que el MCD entre dos números enteros es positivo. Este lema es necesario para la demostración de algunos lemas posteriores*)
@@ -158,6 +174,12 @@ value "let A = mat_of_rows_list 5 ([
 [  -8,   8,  12,  8, 14]]) in 
   show (reduce 3 A 0 )" 
 
+(*RESULTADO:
+[[3,  5,  2, 12,  -5], 
+ [0, 10,  2,  3,  10], 
+ [0,  0, 12,  8,  14], 
+ [0,  1, 45, 15, -18], 
+ [-8, 8, 12,  8,  14]]*)
 
 (*Vamos a hacer un 0 en la posición (3,1). Como pivote usará el A_11 (es decir, el número 10).*)
 value "let A = mat_of_rows_list 5 ([
@@ -173,8 +195,7 @@ value "let A = mat_of_rows_list 5 ([
  [3,  5,  2,  12, - 5], 
  [0,  0,  12,  8,  14], 
  [6,  0,  2,  21, -20],
- [-8, 8,  12,  8,  14]]
-*)
+ [-8, 8,  12,  8,  14]]*)
 
 thm foldl.simps (*Comprobamos el funcionamiento de la función foldl*)
 
@@ -703,33 +724,6 @@ lemma foldl_preserves_diagonal_entry:
   shows "foldl (reduce i) A [0..<j] $$ (j, j) \<noteq> 0" sorry
 (*OTRA POSIBILIDAD : O trabajando en (k,k) donde el problema es que no se entre que valores meter k para que me sirva*)
 
-(*POSIBLE DEMOSTRACIÓN
-using j i_j  Ajj 
-proof(induction j)
-   case 0
-  then show ?case using A by simp 
-next
-  case (Suc j)
-    let ?F = "foldl (reduce i) A [0..<j]"
-  note hyp=Suc(1)
-  note Suc_j_less_i = Suc(3)
-  note less_Suc_j = Suc(2) 
-  note Ajjj = Suc(4)
-  have reduce_Suc:"foldl (reduce i) A [0..<Suc j]  = reduce i ?F j" by auto
-  also have 1:"... $$ (Suc j, Suc j) \<noteq> 0"
-  proof (rule reduce_preserves_diagonal_entry2)
-     show "?F \<in> carrier_mat n n" by (rule foldl_reduce_carrier_mat[OF A])
-     show "i < n" using i by simp
-     show "j < i" using Suc_j_less_i by simp
-     show "0 \<le> j" using Suc.prems assms by auto
-     show "j < Suc j" by simp
-     show "Suc j < i" using Suc.prems sorry
-     show "?F $$ (Suc j,Suc j) \<noteq> 0" sorry (no tiene sentido tener que demostrar esto)
-   qed
-   finally show ?case .
-qed
-*)  
-
 (*Demostramos que al iterar recursivamente reduce de las columnas 0 hasta la j-1, los pivotes All, con l<j, son mayores que los elementos de su columna que están por encima*)
 lemma foldl_reduce_lower_than_diagonal:
   assumes A: "A \<in> carrier_mat n n"
@@ -1251,8 +1245,7 @@ value "let A = mat_of_rows_list 5 ([
  [0,  1,  1,  1654,   7770], 
  [0,  0,  4,  -149,   -708], 
  [0,  0,  0,  -455,  -2138], 
- [-8, 8, 12,     8,     14]]
-*)
+ [-8, 8, 12,     8,     14]]*)
 
 value "let A = mat_of_rows_list 3 ([
         [3, 6, -9::int],
@@ -1263,8 +1256,7 @@ value "let A = mat_of_rows_list 3 ([
 (*RESULTADO:
 [[4,  0, 0], 
  [-6, 1, 2], 
- [-5, 0, 3]]
-*)
+ [-5, 0, 3]]*)
 
 (*Si ahora cojo una matriz 5x5 llena de números:*)
 value "let A = mat_of_rows_list 5 ([
@@ -1280,8 +1272,7 @@ value "let A = mat_of_rows_list 5 ([
  [0, 1, 1, 2,   466], 
  [0, 0, 4, 5, 12856], 
  [0, 0, 0, 7,  8746], 
- [0, 0, 0, 0, 29808]]
-*)
+ [0, 0, 0, 0, 29808]]*)
 
 definition is_in_Hermite :: "int mat \<Rightarrow> bool"
   where "is_in_Hermite A = (
@@ -1296,5 +1287,4 @@ lemma Final:
   and inv_A: "invertible_mat A"
  shows "is_in_Hermite (HNF_Kannan_Bachem A)"
   sorry
-thm (latex) Final
 end
