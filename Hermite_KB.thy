@@ -713,113 +713,6 @@ next
   finally show ?case .
 qed
 
-(*Demostramos que al iterar recursivamente reduce de las columnas 0 hasta la j-1, el pivote Ajj sigue siendo distinto de 0*)
-(*No esta demostrado*)
-lemma foldl_preserves_diagonal_entry:
- assumes A: "A \<in> carrier_mat n n"
-    and i: "i < n"
-    and j: "j > 0"
-    and i_j: "j<i"
-    and Ajj:"A $$ (j, j) \<noteq> 0"
-  shows "foldl (reduce i) A [0..<j] $$ (j, j) \<noteq> 0" sorry
-(*OTRA POSIBILIDAD : O trabajando en (k,k) donde el problema es que no se entre que valores meter k para que me sirva*)
-
-(*Demostramos que al iterar recursivamente reduce de las columnas 0 hasta la j-1, los pivotes All, con l<j, son mayores que los elementos de su columna que están por encima*)
-lemma foldl_reduce_lower_than_diagonal:
-  assumes A: "A \<in> carrier_mat n n"
-    and i: "i < n"
-    and k: "k<j"
-    and j: "j > 0"
-    and i_j: "j\<le>i"
-    and l_j: "l<j"
-    and k_l: "k<l"
-    and Ail:"A $$ (i, l)= 0"
-    and Ajj:"A $$ (j, j) \<noteq> 0"
-  shows "foldl (reduce i) A [0..<j] $$ (k, l) < foldl (reduce i) A [0..<j] $$ (l, l)" 
-  using i_j  j l_j k k_l Ajj
-proof (induction j)
-  case 0
-  then show ?case using A by simp 
-next
-  case (Suc j)
-    let ?F = "foldl (reduce i) A [0..<j]"
-  note hyp=Suc(1)
-  note Suc_j_less_i = Suc(2)
-  note less_Suc_j = Suc(3) 
-  note l_le_Suc_j = Suc(4)
-  note k_le_Suc_j = Suc(5)
-  note k_le_l = Suc(6)
-  note Ajj1 = Suc(7)
-  have reduce_Suc:"foldl (reduce i) A [0..<Suc j]  = reduce i ?F j" by auto
-  also have 1:"...$$ (k, l) < reduce i ?F j $$ (l,l)" 
-  proof (cases "l = j")
-    case True
-      have 1: "reduce i ?F j $$ (k, j) < reduce i ?F j $$ (j,j)"
-      proof (rule reduce_lower_than_diagonal)
-        show "?F \<in> carrier_mat n n" by (rule foldl_reduce_carrier_mat[OF A])
-        show "i < n" using i by simp
-        show "j < i" using Suc_j_less_i by simp
-        show "0 < j" using less_Suc_j  k_le_l l_le_Suc_j by simp
-        show "k < j" using True Suc(6) by simp
-        show "?F $$ (j, j) \<noteq> 0"   
-         proof( rule foldl_preserves_diagonal_entry)(*NO ESTÁ DEMOSTRADO*)
-          show "A ∈ carrier_mat n n " using assms by auto
-          show "i < n" using i by simp
-          show "0 < j" using less_Suc_j  k_le_l l_le_Suc_j by simp
-          show "j < i" using Suc_j_less_i by auto
-          show "A $$ (j, j) ≠ 0" using Suc.prems assms sorry
-         qed
-      qed
-      show ?thesis using True 1 reduce_Suc unfolding reduce_def 
-        by meson
-  next
-    case False
-    then have l_less_j: "l < j" using l_le_Suc_j by simp
-    have 4:"?F $$ (k, l) < ?F $$ (l, l)"
-       proof (rule hyp) (*HIPOTESIS DE INDUCCIÓN*)
-         show "j\<le>i" by (simp add: Suc(2) Suc_leD) 
-         show "0< j"  using  less_Suc_j  k_le_l l_le_Suc_j by auto
-         show "l < j" using Suc(4) 
-           by (simp add: l_less_j)
-         show " k < j" using  l_less_j  Suc(6) by auto
-         show "k<l" using assms by auto
-         show "A $$ (j, j) \<noteq> 0" sorry
-       qed 
-   have 5:"reduce i ?F j $$ (k, l) = ?F $$ (k, l)"
-   proof(rule reduce_preserves_elements) (*LEMA DEMOSTRADO ANTES*)
-     show "?F\<in> carrier_mat n n"  by (rule foldl_reduce_carrier_mat[OF A])
-     show "i < n" using i by simp
-     show "j < i" using Suc_j_less_i by simp
-     show "0 < j" using less_Suc_j  k_le_l l_le_Suc_j by simp
-     show "l < j" using Suc(4) 
-       by (simp add: l_less_j)
-     show " k < j" using  l_less_j  Suc(6) by auto
-     show "foldl (reduce i) A [0..<j] $$ (i, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
-     show "foldl (reduce i) A [0..<j] $$ (j, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
-     show "?F $$ (j,j)\<noteq>0" sorry (*NO ESTÁ DEMOSTRADO*)
-   qed
-   have 6:"reduce i ?F j $$ (k, l) < ?F $$ (l,l)" using  False 4 5 l_less_j 
-     by linarith
-   also have 7:"reduce i ?F j $$ (l, l) = ..."  
-   proof(rule reduce_preserves_elements) (*POSIBLE DEMOSTRACIÓN*)
-     show "?F\<in> carrier_mat n n"  by (rule foldl_reduce_carrier_mat[OF A])
-     show "i < n" using i by simp
-     show "j < i" using Suc_j_less_i by simp
-     show "0 < j" using less_Suc_j sledgehammer
-       using l_less_j by auto
-     show "l < j" using Suc(4) 
-           by (simp add: l_less_j)
-     show "l < j" using Suc(4) 
-       by (simp add: l_less_j)
-     show "foldl (reduce i) A [0..<j] $$ (i, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
-     show "foldl (reduce i) A [0..<j] $$ (j, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
-     show "?F $$ (j,j)\<noteq>0" sorry (*NO ESTÁ DEMOSTRADO*)
-   qed
-    finally show ?thesis using 4 5 6  7 False l_less_j by auto
-  qed
-  finally show ?case .
-qed
-
 (*Demostramos que al iterar recursivamente reduce de las columnas 0 hasta la j-1, los elementos de la fila i y de las columnas k, con k<j, son 0's*)
 lemma foldl_reduce_0:
   assumes A: "A \<in> carrier_mat n n"
@@ -879,6 +772,166 @@ next
   finally show ?case .
 qed
 
+(*Demostramos que al iterar recursivamente reduce de las columnas 0 hasta la j-1, el pivote Ajj sigue siendo distinto de 0*)
+(*No esta demostrado*)
+lemma foldl_preserves_diagonal_entry:
+ assumes A: "A \<in> carrier_mat n n"
+    and i: "i < n"
+    and j: "j > 0"
+    and k_j: "k<j"
+    and i_j: "j<i"
+    and "k>0"
+    and Akk:"A $$ (k, k) \<noteq> 0"
+  shows "foldl (reduce i) A [0..<j] $$ (k, k) \<noteq> 0" 
+  using i_j j k_j 
+proof (induction j)  (*INTENTO DE PRUEBA FALLIDO YA QUE PARA QUE LA DEMOSTRACIÓN SEA CIERTA NECESITAMOS QUE LA 
+HIPÓTESIS SEA CIERTA, LO QUE ES ABSURDO*)
+  case 0
+  then show ?case using assms by auto
+next
+  case (Suc j)
+  let ?F = "foldl (reduce i) A [0..<j]"
+  note hyp=Suc(1)
+  note Suc_j_less_i = Suc(2)
+  note less_Suc_j = Suc(3)
+  note k_le_Suc_j = Suc(4)
+  have "foldl (reduce i) A [0..<Suc j]  = reduce i ?F j" by auto
+  also have "... $$ (k, k) \<noteq> 0" 
+   proof (cases "k=j")
+    case True
+    have "reduce i ?F j $$ (j,j) \<noteq> 0"
+    proof(rule reduce_preserves_diagonal_entry)
+      show "foldl (reduce i) A [0..<j] \<in> carrier_mat n n" by (rule foldl_reduce_carrier_mat[OF A])
+      show "i < n" using assms by auto
+      show "j < i"  using Suc(2) le_simps(3)  by linarith
+      show "0 < j"  using less_Suc_j 
+       using k_le_Suc_j assms by auto
+      show "foldl (reduce i) A [0..<j] $$ (j, j) ≠ 0" sorry (*NO ESTÁ DEMOSTRADO, ESTAMOS VOLVIENDO A LA HIPÓTESIS INICIAL*)
+    qed
+     thus ?thesis using True by simp
+  next
+    case False
+    hence k_less_j: "k<j"
+      using Suc(4) less_SucE by blast
+    have hyp: "?F $$ (k,k) ≠ 0" 
+    proof (rule hyp) (*HIPOTESIS DE INDUCCIÓN*)
+      show "j<i" 
+        by (simp add: Suc(2) Suc_lessD) 
+      show "0 < j" using k_less_j by linarith
+      show "k < j" using k_less_j .
+    qed
+ have "reduce i ?F j $$ (k, k) = ?F $$ (k, k)"       
+    proof (rule reduce_preserves_elements) (*LEMA DEMOSTRADO ANTES*)
+      show "?F\<in> carrier_mat n n"  by (rule foldl_reduce_carrier_mat[OF A])
+      show "i < n" using i by simp
+      show "j < i" using Suc_j_less_i by simp
+      show "0 < j" using k_less_j by linarith
+      show "k < j" 
+        by (simp add: k_less_j)
+     show " k < j"  by (simp add: k_less_j)
+     show "foldl (reduce i) A [0..<j] $$ (i, k) = 0" using foldl_reduce_0 
+       using ‹0 < j› ‹j < i› assms(1) assms(2) dual_order.strict_iff_not k_less_j by blast
+     show "foldl (reduce i) A [0..<j] $$ (j, k) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
+     show "?F $$ (j,j)\<noteq>0"  sorry (*NO ESTÁ DEMOSTRADO,  ESTAMOS VOLVIENDO A LA HIPÓTESIS INICIAL*)
+   qed
+    also have "?F $$ (k, k) ≠ 0" using hyp by simp
+    finally show ?thesis .
+  qed
+  finally show ?case .
+qed
+
+(*Demostramos que al iterar recursivamente reduce de las columnas 0 hasta la j-1, los pivotes All, con l<j, son mayores que los elementos de su columna que están por encima*)
+lemma foldl_reduce_lower_than_diagonal:
+  assumes A: "A \<in> carrier_mat n n"
+    and i: "i < n"
+    and k: "k<j"
+    and j: "j > 0"
+    and i_j: "j\<le>i"
+    and l_j: "l<j"
+    and k_l: "k<l"
+    and Ail:"A $$ (i, l)= 0"
+    and Ajj:"A $$ (j, j) \<noteq> 0"
+  shows "foldl (reduce i) A [0..<j] $$ (k, l) < foldl (reduce i) A [0..<j] $$ (l, l)" 
+  using i_j  j l_j k k_l Ajj
+proof (induction j)
+  case 0
+  then show ?case using A by simp 
+next
+  case (Suc j)
+    let ?F = "foldl (reduce i) A [0..<j]"
+  note hyp=Suc(1)
+  note Suc_j_less_i = Suc(2)
+  note less_Suc_j = Suc(3) 
+  note l_le_Suc_j = Suc(4)
+  note k_le_Suc_j = Suc(5)
+  note k_le_l = Suc(6)
+  note Ajj1 = Suc(7)
+  have reduce_Suc:"foldl (reduce i) A [0..<Suc j]  = reduce i ?F j" by auto
+  also have 1:"...$$ (k, l) < reduce i ?F j $$ (l,l)" 
+  proof (cases "l = j")
+    case True
+      have 1: "reduce i ?F j $$ (k, j) < reduce i ?F j $$ (j,j)"
+      proof (rule reduce_lower_than_diagonal)
+        show "?F \<in> carrier_mat n n" by (rule foldl_reduce_carrier_mat[OF A])
+        show "i < n" using i by simp
+        show "j < i" using Suc_j_less_i by simp
+        show "0 < j" using less_Suc_j  k_le_l l_le_Suc_j by simp
+        show "k < j" using True Suc(6) by simp
+        show "?F $$ (j, j) \<noteq> 0" sorry  (*NO ESTÁ DEMOSTRADO*)
+      qed
+      show ?thesis using True 1 reduce_Suc unfolding reduce_def 
+        by meson
+  next
+    case False
+    then have l_less_j: "l < j" using l_le_Suc_j by simp
+    have 4:"?F $$ (k, l) < ?F $$ (l, l)"
+       proof (rule hyp) (*HIPOTESIS DE INDUCCIÓN*)
+         show "j\<le>i" by (simp add: Suc(2) Suc_leD) 
+         show "0< j"  using  less_Suc_j  k_le_l l_le_Suc_j by auto
+         show "l < j" using Suc(4) 
+           by (simp add: l_less_j)
+         show " k < j" using  l_less_j  Suc(6) by auto
+         show "k<l" using assms by auto
+         show "A $$ (j, j) \<noteq> 0" sorry
+       qed 
+   have 5:"reduce i ?F j $$ (k, l) = ?F $$ (k, l)"
+   proof(rule reduce_preserves_elements) (*LEMA DEMOSTRADO ANTES*)
+     show "?F\<in> carrier_mat n n"  by (rule foldl_reduce_carrier_mat[OF A])
+     show "i < n" using i by simp
+     show "j < i" using Suc_j_less_i by simp
+     show "0 < j" using less_Suc_j  k_le_l l_le_Suc_j by simp
+     show "l < j" using Suc(4) 
+       by (simp add: l_less_j)
+     show " k < j" using  l_less_j  Suc(6) by auto
+     show "foldl (reduce i) A [0..<j] $$ (i, l) = 0" using foldl_reduce_0 
+       using ‹0 < j› ‹j < i› assms(1) assms(2) dual_order.strict_iff_not l_less_j by blast
+     show "foldl (reduce i) A [0..<j] $$ (j, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
+     show "?F $$ (j,j)\<noteq>0" using foldl_preserves_diagonal_entry sorry (*NO ESTÁ DEMOSTRADO*)
+   qed
+   have 6:"reduce i ?F j $$ (k, l) < ?F $$ (l,l)" using  False 4 5 l_less_j 
+     by linarith
+   also have 7:"reduce i ?F j $$ (l, l) = ..."  
+   proof(rule reduce_preserves_elements) (*POSIBLE DEMOSTRACIÓN*)
+     show "?F\<in> carrier_mat n n"  by (rule foldl_reduce_carrier_mat[OF A])
+     show "i < n" using i by simp
+     show "j < i" using Suc_j_less_i by simp
+     show "0 < j" using less_Suc_j 
+       using l_less_j by auto
+     show "l < j" using Suc(4) 
+           by (simp add: l_less_j)
+     show "l < j" using Suc(4) 
+       by (simp add: l_less_j)
+     show "foldl (reduce i) A [0..<j] $$ (i, l) = 0" 
+       using ‹0 < j› ‹j < i›  foldl_reduce_0  assms(1) assms(2) dual_order.strict_iff_not l_less_j by blast 
+     show "foldl (reduce i) A [0..<j] $$ (j, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
+     show "?F $$ (j,j)\<noteq>0" sorry (*NO ESTÁ DEMOSTRADO*)
+   qed
+    finally show ?thesis using 4 5 6  7 False l_less_j by auto
+  qed
+  finally show ?case .
+qed
+
+
 (*Demostramos que al iterar recursivamente reduce de las columnas 0 hasta la j-1, las entradas del bloque j-1 x j-1 son mayores o iguales a 0*)
 lemma foldl_reduce_positive_elements:
   assumes A: "A \<in> carrier_mat n n"
@@ -927,7 +980,7 @@ next
       next
       case False
       then have "k = j" using k_le_Suc_j by simp
-      have 2: "reduce i ?F j $$ (j, j) > 0" using pq_times_Ajj_plus_q_Aij_strictly_positive reduce_Suc
+      have 2: "reduce i ?F j $$ (j, j) > 0" using foldl_preserves_diagonal_entry pq_times_Ajj_plus_q_Aij_strictly_positive reduce_Suc
             False unfolding reduce_def 
         sorry  (*NO ESTÁ DEMOSTRADO*)   
       then show ?thesis using 2 False reduce_Suc unfolding reduce_def 
@@ -958,9 +1011,9 @@ next
        show "k < j" using True by simp
        show " l < j" using Suc(4) 
            by (simp add: l_less_j)
-       show "?F $$ (j, j) \<noteq> 0"   using reduce_Suc unfolding reduce_def 
-         sorry (*NO ESTÁ DEMOSTRADO*)
-       show "foldl (reduce i) A [0..<j] $$ (i, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
+       show "?F $$ (j, j) \<noteq> 0"  using reduce_Suc unfolding reduce_def  sorry (*NO ESTÁ DEMOSTRADO*)
+       show "foldl (reduce i) A [0..<j] $$ (i, l) = 0" using foldl_reduce_0 
+         using Suc(2) Suc_leD ‹0 < j› assms(1) assms(2) l_less_j by presburger 
        show "foldl (reduce i) A [0..<j] $$ (j, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
      qed
     also have "?F $$ (k, l) \<ge> 0" using hyp by simp
