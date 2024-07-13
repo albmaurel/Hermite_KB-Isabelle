@@ -812,7 +812,7 @@ next
       show "j < i"  using Suc(2) le_simps(3)  by linarith
       show "0 < j"  using less_Suc_j 
        using k_le_Suc_j assms by auto
-      show "foldl (reduce i) A [0..<j] $$ (j, j) ≠ 0" sorry (*NO ESTÁ DEMOSTRADO, ESTAMOS VOLVIENDO A LA HIPÓTESIS INICIAL*)
+      show "foldl (reduce i) A [0..<j] $$ (j, j) ≠ 0" sorry NO ESTÁ DEMOSTRADO, ESTAMOS VOLVIENDO A LA HIPÓTESIS INICIAL
     qed
      thus ?thesis using True by simp
   next
@@ -820,14 +820,14 @@ next
     hence k_less_j: "k<j"
       using Suc(4) less_SucE by blast
     have hyp: "?F $$ (k,k) ≠ 0" 
-    proof (rule hyp) (*HIPOTESIS DE INDUCCIÓN*)
+    proof (rule hyp) HIPOTESIS DE INDUCCIÓN
       show "j<i" 
         by (simp add: Suc(2) Suc_lessD) 
       show "0 < j" using k_less_j by linarith
       show "k < j" using k_less_j .
     qed
  have "reduce i ?F j $$ (k, k) = ?F $$ (k, k)"       
-    proof (rule reduce_preserves_elements) (*LEMA DEMOSTRADO ANTES*)
+    proof (rule reduce_preserves_elements) LEMA DEMOSTRADO ANTES
       show "?F\<in> carrier_mat n n"  by (rule foldl_reduce_carrier_mat[OF A])
       show "i < n" using i by simp
       show "j < i" using Suc_j_less_i by simp
@@ -838,7 +838,7 @@ next
      show "foldl (reduce i) A [0..<j] $$ (i, k) = 0" using foldl_reduce_0 
        using ‹0 < j› ‹j < i› assms(1) assms(2) dual_order.strict_iff_not k_less_j by blast
      show "foldl (reduce i) A [0..<j] $$ (j, k) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
-     show "?F $$ (j,j)\<noteq>0"  sorry (*NO ESTÁ DEMOSTRADO,  ESTAMOS VOLVIENDO A LA HIPÓTESIS INICIAL*)
+     show "?F $$ (j,j)\<noteq>0"  sorry NO ESTÁ DEMOSTRADO,  ESTAMOS VOLVIENDO A LA HIPÓTESIS INICIAL
    qed
     also have "?F $$ (k, k) ≠ 0" using hyp by simp
     finally show ?thesis .
