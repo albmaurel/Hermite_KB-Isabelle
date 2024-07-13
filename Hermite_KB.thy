@@ -837,7 +837,7 @@ next
      show " k < j"  by (simp add: k_less_j)
      show "foldl (reduce i) A [0..<j] $$ (i, k) = 0" using foldl_reduce_0 
        using ‹0 < j› ‹j < i› assms(1) assms(2) dual_order.strict_iff_not k_less_j by blast
-     show "foldl (reduce i) A [0..<j] $$ (j, k) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
+     show "foldl (reduce i) A [0..<j] $$ (j, k) = 0" sorry NO ESTÁ DEMOSTRADO
      show "?F $$ (j,j)\<noteq>0"  sorry NO ESTÁ DEMOSTRADO,  ESTAMOS VOLVIENDO A LA HIPÓTESIS INICIAL
    qed
     also have "?F $$ (k, k) ≠ 0" using hyp by simp
