@@ -204,8 +204,8 @@ lo que hacemos es iterar la función haciendo recursividad.*)
 
 definition "reduce_row A i = foldl (reduce i) A ([0..<i])"
 
-(*Demostrar que el elemento que esta debajo de la diagonal es 0 
-tras aplicar el metodo reduce para j=0 *)
+(*Demostrar que el elemento en la posición (i,0) es igual a 0 
+tras aplicar el metodo reduce para j=0 e i*)
 lemma reduce_zero_below_diagonal:
   assumes A: "A \<in> carrier_mat n n"
     and kn: "k < n"
@@ -236,7 +236,8 @@ qed
 
 
 (*Demostrar que el elemento que esta debajo de la diagonal en la fila i  y la columna j es 0 
-tras aplicar el metodo reduce para i y j menor que i // En este caso lo mezclamos con el anterior lema para tener un lema general y más sólido*)
+tras aplicar el metodo reduce para i y j menor que i // En este caso lo mezclamos con el anterior 
+lema para tener un lema general y más sólido*)
 lemma reduce_works1:
   assumes A: "A \<in> carrier_mat n n"
     and i_n: "i<n"
@@ -343,7 +344,8 @@ proof -
 qed
 
 (*Demostrar que para el caso de aplicar reduce sobre la fila i y la columna j los elementos en la fila i y 
-las columnas k<j se mantienen en 0 suponiendo que ya son 0. Este lema es importante para comprobar que los 0's obtenidos no se modifican al aplicar al reduce a otras columnas*)
+las columnas k<j se mantienen en 0 suponiendo que ya son 0. Este lema es importante para comprobar 
+que los 0's obtenidos no se modifican al aplicar al reduce a otras columnas*)
 lemma reduce_works3:
   assumes A: "A \<in> carrier_mat n n"
     and i_n: "i<n"
@@ -443,14 +445,15 @@ proof -
   qed
 qed
 
-(*Demostración de que al aplicar reduce sobre la fila i y columna j los elementos de la columna j de las filas k tal que k<j son positivos o iguales a 0*)
+(*Demostración de que al aplicar reduce sobre la fila i y columna j los elementos de la columna j 
+de las filas k tal que k<j son mayores o iguales que 0*)
 lemma reduce_preserves_positivity_above:
   assumes A: "A \<in> carrier_mat n n"
     and i_n: "i < n"
     and j_i: "j < i"
     and j0: "j > 0"
     and k_j: "k < j"
-    and Ajj:"A $$ (j, j) \<noteq> 0" (*Esta condición es cierta, ya que al asumir que los menores principales de la matriz A son no singulares esto es verdad*)
+    and Ajj:"A $$ (j, j) \<noteq> 0" (*Esta condición es cierta, ya que asumimos que los menores principales de la matriz A son no singulares*)
   shows "(reduce i A j) $$ (k, j) \<ge> 0"
 proof -
   let ?Ajj = "A $$(j, j)"
@@ -697,9 +700,10 @@ next
     by presburger
 qed
 
-(*Como se comento en la memoria para poder estudiar los lemas sobre la función reduce_row es necesario demostrarlos primero para el foldl hasta un determinado j*)
+(*Como se comento en la memoria para poder estudiar los lemas sobre la función reduce_row es 
+necesario demostrarlos primero para el foldl hasta un determinado j*)
 
-(*Demostramos que al iterar recursivamente reduce de las columnas 0 hasta la j-1 se mantienen las dimensiones nxn de la matriz*)
+(*Demostramos que al aplicar iterativamente reduce en las columnas 0 hasta la j-1 se mantienen las dimensiones nxn de la matriz*)
 lemma foldl_reduce_carrier_mat:
   assumes A: "A \<in> carrier_mat n n"
   shows "foldl (reduce i) A [0..<j] \<in> carrier_mat n n"
@@ -713,7 +717,8 @@ next
   finally show ?case .
 qed
 
-(*Demostramos que al iterar recursivamente reduce de las columnas 0 hasta la j-1, los elementos de la fila i y de las columnas k, con k<j, son 0's*)
+(*Demostramos que al aplicar iterativamente reduce en las columnas 0 hasta la j-1, los elementos de 
+la fila i y de las columnas k, con k<j, son 0's*)
 lemma foldl_reduce_0:
   assumes A: "A \<in> carrier_mat n n"
     and kj: "k < j"
@@ -772,7 +777,8 @@ next
   finally show ?case .
 qed
 
-(*Demostramos que al iterar recursivamente reduce de las columnas 0 hasta la j-1, el pivote Ajj sigue siendo distinto de 0*)
+(*Demostramos que al aplicar iterativamente reduce en las columnas 0 hasta la j-1, el pivote 
+Ajj sigue siendo distinto de 0*)
 (*No esta demostrado*)
 lemma foldl_preserves_diagonal_entry:
  assumes A: "A \<in> carrier_mat n n"
@@ -782,8 +788,8 @@ lemma foldl_preserves_diagonal_entry:
     and i_j: "j<i"
     and "k>0"
     and Akk:"A $$ (k, k) \<noteq> 0"
-  shows "foldl (reduce i) A [0..<j] $$ (k, k) \<noteq> 0" 
-  using i_j j k_j 
+  shows "foldl (reduce i) A [0..<j] $$ (k, k) \<noteq> 0" sorry
+(*  using i_j j k_j 
 proof (induction j)  (*INTENTO DE PRUEBA FALLIDO YA QUE PARA QUE LA DEMOSTRACIÓN SEA CIERTA NECESITAMOS QUE LA 
 HIPÓTESIS SEA CIERTA, LO QUE ES ABSURDO*)
   case 0
@@ -838,9 +844,9 @@ next
     finally show ?thesis .
   qed
   finally show ?case .
-qed
+qed*)
 
-(*Demostramos que al iterar recursivamente reduce de las columnas 0 hasta la j-1, los pivotes All, con l<j, son mayores que los elementos de su columna que están por encima*)
+(*Demostramos que al aplicar iterativamente reduce en las columnas 0 hasta la j-1, los pivotes All, con l<j, son mayores que los elementos de su columna que están por encima*)
 lemma foldl_reduce_lower_than_diagonal:
   assumes A: "A \<in> carrier_mat n n"
     and i: "i < n"
@@ -849,7 +855,7 @@ lemma foldl_reduce_lower_than_diagonal:
     and i_j: "j\<le>i"
     and l_j: "l<j"
     and k_l: "k<l"
-    and Ail:"A $$ (i, l)= 0"
+    and Ail:"A $$ (i, l)= 0" (*Asumimos que el algoritmo ha conseguido 0's en los elementos  (i, l)*)
     and Ajj:"A $$ (j, j) \<noteq> 0"
   shows "foldl (reduce i) A [0..<j] $$ (k, l) < foldl (reduce i) A [0..<j] $$ (l, l)" 
   using i_j  j l_j k k_l Ajj
@@ -906,7 +912,7 @@ next
      show "foldl (reduce i) A [0..<j] $$ (i, l) = 0" using foldl_reduce_0 
        using ‹0 < j› ‹j < i› assms(1) assms(2) dual_order.strict_iff_not l_less_j by blast
      show "foldl (reduce i) A [0..<j] $$ (j, l) = 0" sorry (*NO ESTÁ DEMOSTRADO*)
-     show "?F $$ (j,j)\<noteq>0" using foldl_preserves_diagonal_entry sorry (*NO ESTÁ DEMOSTRADO*)
+     show "?F $$ (j,j)\<noteq>0"  sorry (*NO ESTÁ DEMOSTRADO*)
    qed
    have 6:"reduce i ?F j $$ (k, l) < ?F $$ (l,l)" using  False 4 5 l_less_j 
      by linarith
@@ -932,7 +938,7 @@ next
 qed
 
 
-(*Demostramos que al iterar recursivamente reduce de las columnas 0 hasta la j-1, las entradas del bloque j-1 x j-1 son mayores o iguales a 0*)
+(*Demostramos que al aplicar iterativamente reduce en las columnas 0 hasta la j-1, las entradas del bloque j-1 x j-1 son mayores o iguales a 0*)
 lemma foldl_reduce_positive_elements:
   assumes A: "A \<in> carrier_mat n n"
     and i: "i < n"
@@ -966,7 +972,7 @@ next
         using Suc(4) less_SucE 
         using True by linarith
       have 1: "reduce i ?F j $$ (k, j) \<ge> 0"
-      proof (rule reduce_preserves_positivity_above)
+      proof (rule reduce_preserves_positivity_above)  (*LEMA DEMOSTRADO ANTES*)
         show "?F \<in> carrier_mat n n" by (rule foldl_reduce_carrier_mat[OF A])
         show "i < n" using i by simp
         show "j < i" using Suc_j_less_i by simp
@@ -994,7 +1000,7 @@ next
       case True
       hence k_less_j: "k<j"
       using Suc(4) less_SucE by blast
-      have hyp:"?F $$ (k, l) \<ge> 0"
+      have hyp:"?F $$ (k, l) \<ge> 0" (*HIPÓTESIS DE INDUCCIÓN*)
        proof (rule hyp)
          show "j\<le>i" by (simp add: Suc(2) Suc_leD) 
          show "0< j"  using k_less_j by auto
@@ -1003,7 +1009,7 @@ next
          show " k < j" using Suc(5) less_SucE  True by auto
        qed  
     have 3:"reduce i ?F j $$ (k, l) = ?F $$ (k, l)"
-    proof (rule reduce_preserves_elements)
+    proof (rule reduce_preserves_elements) (*LEMA DEMOSTRADO ANTES*)
        show "?F \<in> carrier_mat n n" by (rule foldl_reduce_carrier_mat[OF A])
        show "i < n" using i by simp
        show "j < i" using Suc_j_less_i by simp
@@ -1046,7 +1052,8 @@ proof -
   finally show ?thesis .
 qed
 
-(*Demostramos que se tienen ceros en la fila i hasta la posición i (no incluida) al aplicar reduce_row sobre la fila i en la matriz A*)
+(*Demostramos que se consiguen ceros en la fila i hasta la posición i (no incluida) al aplicar 
+reduce_row sobre la fila i en la matriz A*)
 lemma reduce_row_induction:
   assumes A: "A \<in> carrier_mat n n"
     and i_n: "i<n"
@@ -1063,7 +1070,8 @@ proof -
   finally show ?thesis .
 qed
 
-(*Demostramos que depués de aplicar reduce_row sobre A y la fila i, las entradas del bloque i-1 x i-1 de la matriz son positivas o iguales a 0*)
+(*Demostramos que después de aplicar reduce_row sobre A y la fila i, las entradas del bloque 
+i-1 x i-1 de la matriz son mayores o iguales que 0*)
 lemma reduce_row_positive:
   assumes A: "A \<in> carrier_mat n n"
     and i_n: "i<n"
@@ -1083,7 +1091,8 @@ proof -
   finally show ?thesis .
 qed
 
-(*Demostramos que al aplicar reduce_row sobre la matriz A y la fila i, los pivotes Ajj, con j<i, son mayores que los elementos de la columna j por encima de este*)
+(*Demostramos que al aplicar reduce_row sobre la matriz A y la fila i, los pivotes Ajj, con j<i,
+ son mayores que los elementos de la columna j por encima de este*)
 lemma reduce_row_lower_diagonal:
   assumes A: "A \<in> carrier_mat n n"
     and i_n: "i<n"
@@ -1152,7 +1161,8 @@ proof -
 qed
 
 (*Este lema es necesario para la demostración de final_reduce_induction*)
-(*Demostramos que al aplicar reduce_off_diagonal y reduce_positive sobre i las entradas A $$ (i,j) = 0 (estas son 0 por la naturaleza del algoritmo) siguen siendo 0*)
+(*Demostramos que al aplicar reduce_off_diagonal y reduce_positive sobre i las entradas A $$ (i,j) = 0
+ (estas son 0 por la naturaleza del algoritmo) siguen siendo 0*)
 lemma reduce_off_pos_works:
   assumes A: "A \<in> carrier_mat n n"
     and i_n: "i < n"
@@ -1172,7 +1182,8 @@ proof -
     using A''_ij_eq A'_ij_eq A_ij_zero by simp
 qed
 
-(*Demostramos que al aplicar final_reduce A sobre la fila i, los elementos de la fila i i de las columnas j, con j<i, son 0*)
+(*Demostramos que al aplicar final_reduce A sobre la fila i, los elementos de la fila i y de las columnas j,
+ con j<i, son 0*)
 lemma final_reduce_induction:
   assumes A: "A \<in> carrier_mat n n"
     and i_n: "i<n"
@@ -1202,7 +1213,8 @@ proof-
   show ?thesis using 1 2 3 4 by presburger
 qed
 
-(*Demostramos que final_reduce A  sobre la fila i, consigue que las entradas A(k,i) de la matriz resultante so positivas o iguales a 0  *)
+(*Demostramos que al aplicar final_reduce A  sobre la fila i, consigue que las entradas A(k,i) de la 
+matriz resultante sean mayores o iguales que 0*)
 lemma final_reduce_row_positive:
   assumes A: "A \<in> carrier_mat n n"
     and i_n: "i<n"
@@ -1241,7 +1253,8 @@ proof-
 qed
 
 
-(*Demostramos que final_reduce A  sobre la fila i, el pivote Aii es mayor que la entradas de la columna i por encima de este*)
+(*Demostramos que al aplicar final_reduce A  sobre la fila i, el pivote Aii es mayor que la entradas de la 
+columna i por encima de este*)
 lemma final_reduce_lower_diagonal:
   assumes A: "A \<in> carrier_mat n n"
     and i_n: "i<n"
@@ -1257,7 +1270,7 @@ proof-
     using final_reduce_def by auto
   have 2: "?A'''=reduce_off_diagonal i ?A''" by auto
   have 3 :"(reduce_off_diagonal i (reduce_positive i ?A')) $$ (k, i) < (reduce_off_diagonal i (reduce_positive i ?A')) $$ (i, i)"
-   proof (rule reduce_off_diagonal_works1) (*Hacemos uso del lema desarrollado anteriormente para la demostración de 3*)
+   proof (rule reduce_off_diagonal_works1) (*Hacemos uso del lema desarrollado anteriormente*)
      show "(reduce_positive i ?A') \<in> carrier_mat n n"
        using assms by (simp add: assms(1) reduce_row_carrier)
      show "k<i" using assms by simp
