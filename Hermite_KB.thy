@@ -790,8 +790,8 @@ lemma foldl_preserves_diagonal_entry:
     and Akk:"A $$ (k, k) \<noteq> 0"
   shows "foldl (reduce i) A [0..<j] $$ (k, k) \<noteq> 0" sorry
 (*  using i_j j k_j 
-proof (induction j)  (*INTENTO DE PRUEBA FALLIDO YA QUE PARA QUE LA DEMOSTRACIÓN SEA CIERTA NECESITAMOS QUE LA 
-HIPÓTESIS SEA CIERTA, LO QUE ES ABSURDO*)
+proof (induction j)  INTENTO DE PRUEBA FALLIDO YA QUE PARA QUE LA DEMOSTRACIÓN SEA CIERTA NECESITAMOS QUE LA 
+HIPÓTESIS SEA CIERTA, LO QUE ES ABSURDO
   case 0
   then show ?case using assms by auto
 next
