@@ -37,9 +37,9 @@ fun reduce_positive :: "nat \<Rightarrow> int mat \<Rightarrow> int mat" where
      (multrow k (-1) A)
     else A)"
 
-thm reduce_positive.simps (* Para trabajar con una definition enel contexto de demostraciones, se crea un teorema aplicando definition.simps.*)
+thm reduce_positive.simps (* Para trabajar con una definition en el contexto de demostraciones, se crea un teorema aplicando definition.simps.*)
 
-(*Caso general para la explicacion de que se cumple correctamente el algoritmo y su funcionamiento*)
+(*Caso general para la explicación de que se cumple correctamente el algoritmo y su funcionamiento*)
 lemma reduce_positive_works:
   assumes A: "A \<in> carrier_mat n n"
   shows "reduce_positive k A = (if A $$ (k,k) < 0 then multrow k (-1) A else A)"
@@ -87,7 +87,7 @@ qed
 
 thm reduce_positive.simps
 
-(*Hacemos pruebas de ambas definiciones para comprobar que el resultado es el qeu buscamos y tienen el funcionamiento correcto*)
+(*Hacemos pruebas de ambas definiciones para comprobar que el resultado es el que buscamos y tienen el funcionamiento correcto*)
 value "let A = mat_of_rows_list 4 ([
 [  1,   9, -41,   9::int],
 [  0,  10,   2,   3],
@@ -205,7 +205,7 @@ lo que hacemos es iterar la función haciendo recursividad.*)
 definition "reduce_row A i = foldl (reduce i) A ([0..<i])"
 
 (*Demostrar que el elemento en la posición (i,0) es igual a 0 
-tras aplicar el metodo reduce para j=0 e i*)
+tras aplicar el método reduce para j=0 e i*)
 lemma reduce_zero_below_diagonal:
   assumes A: "A \<in> carrier_mat n n"
     and kn: "k < n"
@@ -236,7 +236,7 @@ qed
 
 
 (*Demostrar que el elemento que esta debajo de la diagonal en la fila i  y la columna j es 0 
-tras aplicar el metodo reduce para i y j menor que i // En este caso lo mezclamos con el anterior 
+tras aplicar el método reduce para i y j menor que i // En este caso lo mezclamos con el anterior 
 lema para tener un lema general y más sólido*)
 lemma reduce_works1:
   assumes A: "A \<in> carrier_mat n n"
@@ -288,7 +288,7 @@ next
 qed
 
 
-(*Demostrar que los metodos reduce_off_diagonal y reduce_positive no modifican los valores de las entradas
+(*Demostrar que los métodos reduce_off_diagonal y reduce_positive no modifican los valores de las entradas
 de la fila i y columnas j con j<i en el caso del reduce*)
 lemma reduce_works2:
   assumes A: "A \<in> carrier_mat n n"
@@ -478,7 +478,7 @@ proof -
    have 2: "?A'' $$ (k, j) = (reduce_off_diagonal j (reduce_positive j ?A')) $$ (k, j)" using assms pquvd 
      by blast
    have 3: "(reduce_off_diagonal j (reduce_positive j ?A')) $$ (k, j)\<ge>0"
-   proof(rule reduce_off_diagonal_works2) (*Hacemos uso del lema desarrollado anteriormente para la demostración de 3*)
+   proof(rule reduce_off_diagonal_works2) (*Hacemos uso del lema desarrollado anteriormente*)
       show  "(reduce_positive j ?A') \<in> carrier_mat n n"
       using assms by simp
       show "j < n"
@@ -486,7 +486,7 @@ proof -
       show  "k < j"
       using reduce_positive_works assms by auto
     show "(reduce_positive j ?A')$$ (j,j)>0"
-    proof- (*Esta demostración no se puede hacer directamente por lo que se crea un nuevo proof -*)
+    proof- (*Esta demostración no se puede hacer directamente por lo que se crea un nuevo proof*)
     have "reduce_positive j ?A' \<in> carrier_mat n n"
        using assms by simp
      have "(reduce_positive j ?A') $$ (j, j) \<ge> ?A' $$ (j, j)"  
@@ -582,7 +582,7 @@ proof -
     unfolding reduce_off_diagonal_def
     using assms pquvd by simp
    have 3 :"(reduce_off_diagonal j (reduce_positive j ?A')) $$ (k, j) < (reduce_off_diagonal j (reduce_positive j ?A')) $$ (j, j)"
-   proof (rule reduce_off_diagonal_works1) (*Hacemos uso del lema desarrollado anteriormente para la demostración de 3*)
+   proof (rule reduce_off_diagonal_works1) (*Hacemos uso del lema desarrollado anteriormente*)
      show "(reduce_positive j ?A') \<in> carrier_mat n n" using assms by simp
      show "k<j" using assms by simp
      show "j < n" using assms by simp
@@ -645,7 +645,7 @@ lemma reduce_preserves_diagonal_entry2:
     and k_j: "k>j" and "k<i"
     and Ajj:"A $$ (k, k) \<noteq> 0"
   shows "(reduce i A j) $$ (k, k) \<noteq> 0"
-proof (cases "j=0") (*Distinguimos j=0 ya que en este caso por la definición de reduce no se aplicarian las funciones reduce positive ni reduce_off_diagonal*)
+proof (cases "j=0") (*Distinguimos j=0 ya que en este caso por la definición de reduce no se aplicarían las funciones reduce positive ni reduce_off_diagonal*)
   case True
   let ?Ajj = "A $$(j, j)"
   let ?Aij = "A $$(i, j)"
@@ -755,7 +755,7 @@ next
     hence k_less_j: "k<j"
       using Suc(4) less_SucE by blast
     have hyp: "?F $$ (i,k) = 0" 
-    proof (rule hyp) (*HIPOTESIS DE INDUCCIÓN*)
+    proof (rule hyp) (*HIPÓTESIS DE INDUCCIÓN*)
       show "j\<le>i" by (simp add: Suc(2) Suc_leD) 
       show "0 < j" using k_less_j by linarith
       show "k < j" using k_less_j .
@@ -820,7 +820,7 @@ next
     hence k_less_j: "k<j"
       using Suc(4) less_SucE by blast
     have hyp: "?F $$ (k,k) ≠ 0" 
-    proof (rule hyp) HIPOTESIS DE INDUCCIÓN
+    proof (rule hyp) HIPÓTESIS DE INDUCCIÓN
       show "j<i" 
         by (simp add: Suc(2) Suc_lessD) 
       show "0 < j" using k_less_j by linarith
@@ -891,7 +891,7 @@ next
     case False
     then have l_less_j: "l < j" using l_le_Suc_j by simp
     have 4:"?F $$ (k, l) < ?F $$ (l, l)"
-       proof (rule hyp) (*HIPOTESIS DE INDUCCIÓN*)
+       proof (rule hyp) (*HIPÓTESIS DE INDUCCIÓN*)
          show "j\<le>i" by (simp add: Suc(2) Suc_leD) 
          show "0< j"  using  less_Suc_j  k_le_l l_le_Suc_j by auto
          show "l < j" using Suc(4) 
