@@ -1,2 +1,2 @@
 # Hermite_KB-Isabelle
-Repositorio dedicado a la implementación y desarrollo de la teoría Hermite_KB de Isabelle, utilizado como base para mi Trabajo de Fin de Grado (TFG). Incluye formalizaciones, pruebas y documentación relacionada con la teoría Hermite_KB en el entorno de Isabelle/HOL.
+Repository dedicated to the implementation and development of the Hermite_KB theory in Isabelle, used as the basis for my Bachelor's Thesis. It includes formalizations, proofs, and documentation related to the Hermite_KB theory within the Isabelle/HOL environment.
